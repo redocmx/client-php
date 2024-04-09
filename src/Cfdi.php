@@ -2,62 +2,31 @@
 
 namespace Redocmx;
 
-require_once 'Pdf.php';
-
-class Cfdi
+class Cfdi extends File
 {
     private $pdf = null;
     private $addenda = null;
-    private $filePath = null;
-    private $fileContent = null;
+    private $addendaReplaceValues = null;
     private $service;
 
-    public function __construct($service)
+    public function __construct()
     {
-        $this->service = $service;
+        parent::__construct();
+        $this->service = Service::getInstance();
     }
 
-    public function fromFile($filePath)
+    public function setAddenda($addenda, $replaceValues = null)
     {
-        $this->filePath = $filePath;
-        return $this;
-    }
-
-    public function fromString($fileContent)
-    {
-        $this->fileContent = $fileContent;
-        return $this;
-    }
-
-    private function getXmlContent()
-    {
-        if ($this->fileContent) {
-            return ['content' => $this->fileContent, 'type' => 'string'];
+        if ($addenda && !($addenda instanceof Addenda)) {
+            throw new \InvalidArgumentException('Addenda must be Addenda instance.');
         }
 
-        if ($this->filePath) {
-            if (!file_exists($this->filePath)) {
-                throw new \Exception("Failed to read XML content from file: {$this->filePath}. The file does not exist.");
-            }
-
-            if(!is_readable($this->filePath)){
-                throw new \Exception("Permission denied: {$this->filePath}. The file exists but cannot be read.");
-            }
-
-            $this->fileContent = file_get_contents($this->filePath);
-            return ['content' => $this->fileContent, 'type' => 'string'];
-        }
-
-        throw new \Exception('XML content for the CFDI must be provided.');
-    }
-
-    public function setAddenda($addenda)
-    {
-        if (!is_string($addenda)) {
-            throw new \InvalidArgumentException('setAddenda function only accepts a string parameter.');
+        if ($replaceValues && gettype($replaceValues) !== 'array') {
+            throw new \InvalidArgumentException('Addenda replace values must be a valid key - value object.');
         }
 
         $this->addenda = $addenda;
+        $this->addendaReplaceValues = $replaceValues;
     }
 
     public function toPdf($payload = [])
@@ -70,16 +39,18 @@ class Cfdi
             throw new \InvalidArgumentException('toPdf function only accepts an array as a parameter.');
         }
 
-        $file = $this->getXmlContent();
-        $payload['format'] = 'pdf';
-        
+        $file = $this->getFile();
+
         if ($this->addenda) {
-            $payload['addenda'] = $this->addenda;
+            $addendaContent = $this->addenda->getFileContent($this->addendaReplaceValues);
+            $payload['addenda'] = $addendaContent;
         }
-        
+
+        $payload['format'] = 'pdf';
+
         $result = $this->service->cfdisConvert($file, $payload);
         $this->pdf = new Pdf($result);
-        
+
         return $this->pdf;
     }
 }

@@ -1,7 +1,7 @@
 {
   "name": "redocmx/client-php",
   "description": "Converción de CFDI a PDF.",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "type": "library",
   "keywords": ["cfdi a pdf", "cfdi", "cfdi to pdf", "conversión cfdi a pdf", "sat mexico", "mexico"],
   "homepage": "https://redoc.mx/",

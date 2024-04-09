@@ -12,6 +12,7 @@ class Service
     {
         $this->apiKey = $apiKey ?: getenv('REDOC_API_KEY');
         $this->apiUrl = getenv('REDOC_API_URL') ?: 'https://api.redoc.mx/cfdis/convert';
+        self::$instance = $this;
     }
 
     public static function getInstance($apiKey = null)
@@ -22,7 +23,8 @@ class Service
         return self::$instance;
     }
 
-    private function parseHeaders($headerString) {
+    private function parseHeaders($headerString)
+    {
         $headers = array();
         $headerLines = explode("\r\n", $headerString);
         foreach ($headerLines as $line) {
@@ -106,5 +108,4 @@ class Service
             'totalTime' => $totalTime
         ];
     }
-    
 }

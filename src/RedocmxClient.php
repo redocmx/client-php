@@ -2,9 +2,6 @@
 
 namespace Redocmx;
 
-require_once 'Service.php';
-require_once 'Cfdi.php';
-
 class RedocmxClient
 {
     private $apiKey;
@@ -18,6 +15,11 @@ class RedocmxClient
 
     public function cfdi()
     {
-        return new Cfdi($this->service);
+        return new Cfdi();
+    }
+
+    public function addenda()
+    {
+        return new Addenda();
     }
 }
